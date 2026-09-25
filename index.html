@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Stream</title>
+    <style>
+        :root {
+            --bg-color: #150DF7;
+            --card-bg: #c0c0c0;
+            --text-color: #000000;
+            --accent-color: #e50914;
+            --input-bg: #2a2a2a;
+            --genre-bg: #333;
+	    --border-card: #919191;
+	    --text-accent: #000000;
+        }
+
+        body {
+            font-family: monospace;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--text-color);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #search {
+            background-color: var(--card-bg);
+            border: 2px solid transparent;
+
+            color: var(--border-card);
+	    color: var(--text-color);
+            padding: 12px 20px;
+            font-size: 1.2rem;
+	    box-shadow: 
+	       3px 3px 0 #404040,
+       	       3px 3px 0 #000000;
+
+            padding: 15px 25px;
+        }
+
+        #search:focus {
+            border-color: var(--accent-color);
+        }
+
+        .movie-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .movie-card {
+	    box-shadow: 
+	       3px 3px 0 #404040,
+       	       3px 3px 0 #000000;
+            background-color: var(--card-bg);
+            text-decoration: none;
+            color: var(--border-card);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            border: 2px solid ;
+            box-sizing: border-box;
+        }
+
+
+        .movie-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            overflow: hidden;
+        }
+
+        .movie-name {
+            font-size: 1.3rem;
+	    color: var(--text-color);
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-meta {
+	  
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: var(--text-accent);
+        }
+
+        .genre-tag {
+
+            background-color: var(--card-bg);
+            font-size: 0.8rem;
+        }
+
+
+
+
+	.search-wrapper {
+	  position: relative;
+	  width: 100%;
+	  max-width: 400px;
+	}
+
+	.searchInput {
+	  width: 100%;
+	  box-sizing: border-box;
+	  padding: 10px 12px 10px 38px;
+
+	  color: var(--card-bg);
+	}
+
+	.search-icon {
+	  position: absolute;
+	  left: 12px;
+	  top: 50%;
+	  width: 18px;
+	  height: 18px;
+	  transform: translateY(-50%);
+	  pointer-events: none;
+	}
+
+        @media (prefers-reduced-motion: reduce) {
+            
+pub fn get_all_mov() -> Result<Vec<Movie>,Error>{
+    let mut result: Vec<Movie> = vec![];
+    let conn = Connection::open(db_path)?;
+    let mut stmt = conn.prepare("
+        SELECT * From movies; 
+        ")?;
+    let mut rows = stmt.query([])?;
+
+    while let Some(row) =  rows.next()?{
+        let mut mov = Movie{
+            id : row.get(0)?,
+            name: row.get(1)?,
+            file_name : row.get(2)?,
+            year: row.get(3)?,
+            imdb_id: row.get(4)?,
+            plot: row.get(5)?,
+            ..Default::default()
+
+        };
+        result.push(mov);
+    }
+    for mov in result.iter_mut(){
+        let mut stmt = conn.prepare("
+            SELECT * From genres
+            WHERE mov_name = ?1;
+            ")?;
+        let mut rows = stmt.query([&mov.name])?;
+        while let Some(row) = rows.next()?{
+            mov.genres.push(row.get(1)?)
+
+        }
+    }
+
+
+
+pub fn get_all_mov() -> Result<Vec<Movie>,Error>{
+    let mut result: Vec<Movie> = vec![];
+    let conn = Connection::open(db_path)?;
+    let mut stmt = conn.prepare("
+        SELECT * From movies; 
+        ")?;
+    let mut rows = stmt.query([])?;
+
+    while let Some(row) =  rows.next()?{
+        let mut mov = Movie{
+            id : row.get(0)?,
+            name: row.get(1)?,
+            file_name : row.get(2)?,
+            year: row.get(3)?,
+            imdb_id: row.get(4)?,
+            plot: row.get(5)?,
+            ..Default::default()
+
+        };
+        result.push(mov);
+    }
+    for mov in result.iter_mut(){
+        let mut stmt = conn.prepare("
+            SELECT * From genres
+            WHERE mov_name = ?1;
+            ")?;
+        let mut rows = stmt.query([&mov.name])?;
+        while let Some(row) = rows.next()?{
+            mov.genres.push(row.get(1)?)
+
+        }
+    }
+
+
+movie-card { transition: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Kino</h1>
+
+	<div class="search-wrapper">
+
+	  <input
+	    type="text"
+	    id="search"
+	    class="searchInput"
+	    placeholder="Search name or genre..."
+	    autocomplete="off"
+	  >
+	</div>
+    </div>
+
+    <div class="movie-list" id="movie-list">
+        <!-- Movies will be injected here -->
+    </div>
+
+    <script>
+        let allMovies = [];
+        const list = document.getElementById('movie-list');
+        const searchInput = document.getElementById('search');
+
+        async function fetchMovies() {
+            try {
+                const response = await fetch('get_all_mov');
+                allMovies = await response.json();
+                renderMovies(allMovies);
+            } catch (error) {
+                list.innerHTML = `<p style="color: red; text-align: center;">Error loading movies. Please check backend API.</p>`;
+                console.error('Fetch error:', error);
+            }
+        }
+
+        function renderMovies(movies) {
+            list.innerHTML = '';
+            
+            movies.forEach(movie => {
+                const card = document.createElement('a');
+                card.className = 'movie-card';
+                card.href = `static${movie.file_name}`;
+                
+                const displayName = movie.name.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
+                
+                // Generate genre tags
+                const genresHtml = movie.genres && movie.genres.length > 0 
+                    ? movie.genres.map(g => `<span class="genre-tag">${g}</span>`).join('')
+                    : '<span class="movie-meta">No genres</span>';
+
+                card.innerHTML = `
+                    <div class="movie-info">
+                        <div class="movie-name">${displayName}</div>
+                        <div class="movie-meta">
+                            <span>${movie.year || 'N/A'}</span>
+                            ${genresHtml}
+                        </div>
+                    </div>
+                    <div style="color: var(--accent-color); font-weight: bold;">▶</div>
+                `;
+                
+                list.appendChild(card);
+            });
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allMovies.filter(m => {
+                const nameMatch = m.name.toLowerCase().includes(term);
+                const genreMatch = m.genres && m.genres.some(g => g.toLowerCase().includes(term));
+                return nameMatch || genreMatch;
+            });
+            renderMovies(filtered);
+        });
+
+        fetchMovies();
+    </script>
+</body>
+</html>
+
